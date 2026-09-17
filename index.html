@@ -1,38 +1,291 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>HAMZA PS4 PS5 Exploit Host</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="HAMZA — offline PS4/PS5 exploit host deck. GoldHEN 7.00 – 13.00.">
+    <title>HAMZA · PS4/PS5 Exploit Deck</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <main class="container">
-    <div class="title-container">
-        <h1 class="main-title">
-            <span class="name-hamza">HAMZA</span>
-            <span class="ps4-title">PS4</span>
-            <span class="ps5-title">PS5</span>
+
+<div class="crt" aria-hidden="true"></div>
+
+<div class="boot" id="boot" aria-hidden="true">
+    <div class="boot__inner">
+        <div class="boot__title">HAMZA</div>
+        <div class="boot__sub">PS4 &#183; PS5 Exploit Deck</div>
+        <div class="boot__log">
+            <p class="boot__line" style="--i:0">&gt; mounting exploit deck</p>
+            <p class="boot__line" style="--i:1">&gt; checking firmware &mdash; <b>7.00 / 13.00</b></p>
+            <p class="boot__line" style="--i:2">&gt; loading GoldHEN 2.4b</p>
+            <p class="boot__line" style="--i:3">&gt; bootline ready</p>
+        </div>
+        <div class="boot__bar"><i></i></div>
+    </div>
+</div>
+
+<div class="field" id="field" aria-hidden="true"></div>
+
+<div class="scene" id="scene">
+    <div class="scene__toolbar" role="group" aria-label="3D view controls" hidden>
+        <span class="scene__label">INTERACTIVE DEPTH / 01</span>
+        <button type="button" class="view-control" id="rotate-left" aria-label="Rotate view left">&#8592;</button>
+        <button type="button" class="view-control" id="rotate-reset">Reset view</button>
+        <button type="button" class="view-control" id="rotate-right" aria-label="Rotate view right">&#8594;</button>
+        <button type="button" class="view-control" id="motion-toggle" aria-pressed="false">3D motion</button>
+    </div>
+<main class="deck">
+
+    <header class="topbar">
+        <span class="topbar__mark" aria-hidden="true">H</span>
+        <span class="topbar__name">HAMZA&#8202;/&#8202;EXPLOIT DECK</span>
+        <span class="topbar__sys">PS4&#183;PS5&#8202;&#183;&#8202;OFFLINE</span>
+    </header>
+
+    <section class="hero">
+        <p class="hero__kicker">FW 7.00 &#8212; 13.00</p>
+
+        <h1 class="hero__title" aria-label="HAMZA PS4 PS5">
+            <span class="word" aria-hidden="true">
+                <span class="word__inner" style="--d:.05s">HAMZA</span>
+            </span>
+            <span class="hero__line" aria-hidden="true" style="--d:.22s">
+                <span class="chip chip--ps4"><i class="led led--ps4"></i>PS4</span>
+                <span class="chip chip--ps5"><i class="led led--ps5"></i>PS5</span>
+            </span>
         </h1>
-        <div class="subtitle">Exploit Host</div>
-        <div class="version-badge">FW 7.00 - 13.00</div>
-    </div>
-    
-    <hr>
-    <br>
-    
-    <div id="menu">
-        <h1>GoldHEN Exploit Host</h1>
-        
-        <!-- زر معدل بدون إيموجي -->
-        <button class="btn" onclick="location.replace('ran/index.html')" 
-               >
-            GoldHEN 7.00 - 13.00
+
+        <p class="hero__tag" style="--d:.38s">Exploit&#160;Host</p>
+
+        <div class="hero__boot" style="--d:.5s">
+            <i class="led led--live" aria-hidden="true"></i>
+            <span class="hero__boot-txt">Bootline ready</span>
+        </div>
+    </section>
+
+    <section class="launch" style="--d:.62s">
+        <button class="btn" type="button" onclick="location.replace('ran/index.html')">
+            <span class="btn__label">GoldHEN&#160;7.00&#160;&#8212;&#160;13.00</span>
+            <span class="btn__arrow" aria-hidden="true">&#8594;</span>
         </button>
-        
-        <footer>
-            <p class="credit">Designed by <a href="#" class="credit-link">HAMZA</a></p>
-            <p class="thanks">A special thanks to all the devs on the scene.</p>
-        </footer>
-    </div>
-    </main>
+        <p class="launch__hint">press &#8212; boot the exploit</p>
+
+        <ul class="spec">
+            <li><span>Kernel</span><b>GoldHEN 2.4b</b></li>
+            <li><span>Mode</span><b>Offline</b></li>
+            <li><span>Payloads</span><b>7.00 / 9.00 / uS / SLOP</b></li>
+        </ul>
+    </section>
+
+    <footer class="foot">
+        <p>Designed by <a href="#" class="foot__link">HAMZA</a></p>
+        <p class="foot__thanks">A special thanks to all the devs on the scene.</p>
+    </footer>
+
+</main>
+</div>
+
+<script>
+(function () {
+    'use strict';
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var coarsePointer = window.matchMedia('(hover: none)').matches;
+    var scene = document.getElementById('scene');
+    var deck = document.querySelector('.deck');
+    var field = document.getElementById('field');
+    var toolbar = scene ? scene.querySelector('.scene__toolbar') : null;
+    var toggle = document.getElementById('motion-toggle');
+    var left = document.getElementById('rotate-left');
+    var right = document.getElementById('rotate-right');
+    var reset = document.getElementById('rotate-reset');
+    var hint = document.querySelector('.launch__hint');
+    var RAN_PATH = 'ran/index.html';
+    var AUTO_SECONDS = 5;
+    var MAX_TILT = 4.5, MAX_STEP = 3, SETTLE = .12;
+    var tx = 0, ty = 0, gx = 0, gy = 0, motion = false, raf = null;
+    var reducedOn = reduceMotion || coarsePointer;
+
+    /* ---------- deck tilt ---------- */
+    function render() {
+        raf = null;
+        gx += (tx - gx) * SETTLE;
+        gy += (ty - gy) * SETTLE;
+        scene.style.transform = 'perspective(1200px) rotateX(' + gy.toFixed(2) + 'deg) rotateY(' + tx.toFixed(2) + 'deg)';
+        if (Math.abs(tx - gx) > .01 || Math.abs(ty - gy) > .01) raf = requestAnimationFrame(render);
+    }
+    function schedule() { if (!raf) raf = requestAnimationFrame(render); }
+    function stop() { tx = ty = 0; schedule(); }
+    function enable() {
+        motion = true;
+        document.documentElement.classList.add('motion-on');
+        if (toggle) { toggle.setAttribute('aria-pressed', 'true'); toggle.textContent = '3D motion: on'; }
+    }
+    function disable() {
+        motion = false;
+        document.documentElement.classList.remove('motion-on');
+        if (scene) scene.style.transform = '';
+        if (toggle) { toggle.setAttribute('aria-pressed', 'false'); toggle.textContent = '3D motion: off'; }
+    }
+
+    /* ---------- colliding controller symbols ---------- */
+    var particles = [];
+    var fieldRaf = null, fieldW = 0, fieldH = 0, lastT = 0;
+
+    function sizeField() { fieldW = window.innerWidth; fieldH = window.innerHeight; }
+
+    function buildField() {
+        var chars = ['\u25B3', '\u25CB', '\u00D7', '\u25A1'];
+        var classes = ['a', 'b', 'c', 'd'];
+        var count = 11;
+        for (var i = 0; i < count; i++) {
+            var el = document.createElement('div');
+            el.className = 'particle particle--' + classes[i % classes.length];
+            var solid = document.createElement('span');
+            solid.className = 'particle__solid';
+            solid.textContent = chars[i % chars.length];
+            el.appendChild(solid);
+            var size = 42 + Math.random() * 26;
+            el.style.width = size + 'px';
+            el.style.height = size + 'px';
+            solid.style.fontSize = (size * 0.42).toFixed(0) + 'px';
+            solid.style.animationDelay = '-' + (Math.random() * 22).toFixed(1) + 's';
+            field.appendChild(el);
+            var a = Math.random() * Math.PI * 2, sp = .3 + Math.random() * .35;
+            particles.push({
+                el: el, r: size / 2,
+                x: size / 2 + Math.random() * Math.max(1, fieldW - size),
+                y: size / 2 + Math.random() * Math.max(1, fieldH - size),
+                vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                target: (i + 1) % count
+            });
+        }
+    }
+
+    function stepField() {
+        var i, j, p, q, count = particles.length;
+        for (i = 0; i < count; i++) {
+            p = particles[i];
+            q = particles[p.target];
+            var dx = q.x - p.x, dy = q.y - p.y;
+            var d = Math.sqrt(dx * dx + dy * dy) || 1;
+            p.vx += (dx / d) * .012 + (Math.random() - .5) * .03;
+            p.vy += (dy / d) * .012 + (Math.random() - .5) * .03;
+            p.vx *= .99; p.vy *= .99;
+            var spd = Math.sqrt(p.vx * p.vx + p.vy * p.vy);
+            if (spd > 1.7) { p.vx *= 1.7 / spd; p.vy *= 1.7 / spd; }
+            p.x += p.vx; p.y += p.vy;
+            if (p.x < p.r) { p.x = p.r; p.vx = Math.abs(p.vx); }
+            if (p.x > fieldW - p.r) { p.x = fieldW - p.r; p.vx = -Math.abs(p.vx); }
+            if (p.y < p.r) { p.y = p.r; p.vy = Math.abs(p.vy); }
+            if (p.y > fieldH - p.r) { p.y = fieldH - p.r; p.vy = -Math.abs(p.vy); }
+        }
+        for (i = 0; i < count; i++) {
+            for (j = i + 1; j < count; j++) {
+                p = particles[i]; q = particles[j];
+                var ddx = q.x - p.x, ddy = q.y - p.y;
+                var dist = Math.sqrt(ddx * ddx + ddy * ddy), min = p.r + q.r;
+                if (dist > 0 && dist < min) {
+                    var nx = ddx / dist, ny = ddy / dist, push = (min - dist) / 2;
+                    p.x -= nx * push; p.y -= ny * push;
+                    q.x += nx * push; q.y += ny * push;
+                    var vn = (q.vx - p.vx) * nx + (q.vy - p.vy) * ny;
+                    if (vn < 0) {
+                        var imp = -(1.92) * vn / 2;
+                        p.vx -= imp * nx; p.vy -= imp * ny;
+                        q.vx += imp * nx; q.vy += imp * ny;
+                    }
+                }
+            }
+        }
+        for (i = 0; i < count; i++) {
+            p = particles[i];
+            p.el.style.transform = 'translate3d(' + (p.x - p.r).toFixed(1) + 'px,' + (p.y - p.r).toFixed(1) + 'px,0)';
+        }
+    }
+
+    function fieldLoop(t) {
+        fieldRaf = requestAnimationFrame(fieldLoop);
+        if (t - lastT < 33) return;
+        lastT = t;
+        stepField();
+    }
+    function startField() { if (field && !fieldRaf) { lastT = 0; fieldRaf = requestAnimationFrame(fieldLoop); } }
+    function stopField() { if (fieldRaf) { cancelAnimationFrame(fieldRaf); fieldRaf = null; } }
+
+    /* ---------- auto-boot ---------- */
+    function go() { window.location.replace(RAN_PATH); }
+    function startAutoBoot() {
+        if (/[?&]noauto/.test(window.location.search)) {
+            if (hint) hint.textContent = 'press \u2014 boot the exploit';
+            return;
+        }
+        var secs = AUTO_SECONDS;
+        if (hint) hint.textContent = 'auto-boot in ' + secs + 's \u2014 no click needed';
+        var iv = setInterval(function () {
+            secs--;
+            if (secs <= 0) { clearInterval(iv); go(); return; }
+            if (hint) hint.textContent = 'auto-boot in ' + secs + 's \u2014 no click needed';
+        }, 1000);
+        window.addEventListener('beforeunload', function () { clearInterval(iv); });
+    }
+
+    if (!scene) return;
+
+    /* ---------- start ---------- */
+    if (reducedOn) {
+        disable();
+    } else {
+        enable();
+    }
+
+    if (field && !reducedOn) {
+        sizeField();
+        buildField();
+        startField();
+        window.addEventListener('resize', function () {
+            sizeField();
+            for (var k = 0; k < particles.length; k++) {
+                var p = particles[k];
+                p.x = Math.min(Math.max(p.r, p.x), Math.max(p.r, fieldW - p.r));
+                p.y = Math.min(Math.max(p.r, p.y), Math.max(p.r, fieldH - p.r));
+            }
+        });
+    }
+
+    if (!reducedOn) {
+        window.addEventListener('pointermove', function (e) {
+            if (!motion) return;
+            var w = window.innerWidth, h = window.innerHeight;
+            tx = ((e.clientX / w) - .5) * 2 * MAX_TILT;
+            ty = -((e.clientY / h) - .5) * 2 * MAX_TILT * .7;
+            if (deck) {
+                var r = deck.getBoundingClientRect();
+                deck.style.setProperty('--px', (((e.clientX - r.left) / r.width) * 100).toFixed(1) + '%');
+                deck.style.setProperty('--py', (((e.clientY - r.top) / r.height) * 100).toFixed(1) + '%');
+            }
+            schedule();
+        }, { passive: true });
+        window.addEventListener('blur', stop);
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) { stop(); stopField(); } else { startField(); }
+        });
+    }
+
+    if (toggle) toggle.addEventListener('click', function () { motion ? disable() : enable(); });
+    function step(dir) { tx = Math.max(-MAX_STEP, Math.min(MAX_STEP, tx + dir)); schedule(); }
+    if (left) left.addEventListener('click', function () { step(-1); });
+    if (right) right.addEventListener('click', function () { step(1); });
+    if (reset) reset.addEventListener('click', stop);
+    window.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') step(-1);
+        else if (e.key === 'ArrowRight') step(1);
+        else if (e.key === 'Escape') stop();
+    });
+
+    startAutoBoot();
+})();
+</script>
+
 </body>
 </html>
